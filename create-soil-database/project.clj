@@ -6,6 +6,8 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [korma "0.3.0-RC4"]
                  [clojure-csv/clojure-csv "2.0.0-alpha1"]
-                 [sqlitejdbc "0.5.6"]
+                 #_[sqlitejdbc "0.5.6"]
+                 [org.clojure/java.jdbc "0.3.0-alpha1"]
+                 [org.xerial/sqlite-jdbc "3.7.2"]
                  [org.clojure/algo.generic "0.1.0"]]
-  :main create-soil-database.core)
+  :main create-soil-database.soilmap)
