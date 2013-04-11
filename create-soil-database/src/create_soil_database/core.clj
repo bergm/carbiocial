@@ -2,11 +2,12 @@
   (require [korma 
             [db :as kdb]
             [core :as kc]]
+           [clojure.edn :as edn]
            [clojure-csv.core :as csv]
            [clojure.algo.generic.functor :as gf]))
 
-(def cols {:lat :lat
-           :lng :long
+(def cols {:lat :lat_times_10000
+           :lng :lng_times_10000
            :h-id :horizon_id
            :soil-type :soil_type
            :soil-depth :soil_profile_depth_cm
@@ -30,24 +31,22 @@
 (def parsed-csv (csv/parse-csv file :delimiter \tab))
 
 (defn create-insert-seq [csv]
-  (let [pd #(Double/parseDouble %)
-        pi #(Integer/parseInt %)]
-    (for [[lat lng soil-class soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
-      {(:lat cols) (pd lat) 
-       (:lng cols) (pd lng) 
-       (:h-id cols) (pi hz-id) 
-       (:soil-type cols) soil-class 
-       (:soil-depth cols) (pi soil-depth)
-       (:h-symb cols) hz-simb 
-       (:upper cols) (pi upper) 
-       (:lower cols) (pi lower) 
-       (:silt cols) (pi silt) 
-       (:clay cols) (pi clay) 
-       (:sand cols) (pi sand)
-       (:ph cols) (pd ph) 
-       (:c cols) (pd c) 
-       (:c-n cols) (pd c-n) 
-       (:bd cols) (pd bd)})))
+  (for [[lat lng soil-class soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
+    {(:lat cols) (int (* (edn/read-string lat) 10000))
+     (:lng cols) (int (* (edn/read-string lng) 10000)) 
+     (:h-id cols) (edn/read-string hz-id) 
+     (:soil-type cols) soil-class 
+     (:soil-depth cols) (edn/read-string soil-depth)
+     (:h-symb cols) hz-simb 
+     (:upper cols) (edn/read-string upper) 
+     (:lower cols) (edn/read-string lower) 
+     (:silt cols) (edn/read-string silt) 
+     (:clay cols) (edn/read-string clay) 
+     (:sand cols) (edn/read-string sand)
+     (:ph cols) (edn/read-string ph) 
+     (:c cols) (edn/read-string c) 
+     (:c-n cols) (edn/read-string c-n) 
+     (:bd cols) (edn/read-string bd)}))
 
 (def insert-seq (create-insert-seq (rest parsed-csv)))
 

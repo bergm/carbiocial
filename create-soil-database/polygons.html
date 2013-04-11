@@ -3,35 +3,79 @@
   <head>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>Google Maps JavaScript API Example</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=geometry"></script>
     <script type="text/javascript">
+      function LL(lat, lng){ return new google.maps.LatLng(lat,lng); }
+    </script>
+    <script type="text/javascript" src="regions-and-profiles.js"></script>
+    <script type="text/javascript">
+      function calc(spi){
+        var lat10000 = soilProfiles[spi].lat10000;
+        var lng10000 = soilProfiles[spi].lng10000;
+        var spCoord = soilProfiles[spi].coord; //LL(-60.13,5.03);
+            
+        
+        for(var ri in regions){
+          var rId = regions[ri].id;
+          var rPoly = regions[ri].poly;
+          
+          /*
+          var ps = "poly: [";
+          for(var pi in rPoly){
+            ps = ps + "LL(" + rPoly[pi].lat() + "," + rPoly[pi].lng() + "),";
+          }
+          ps = ps + "]";
+          
+          $("#out").append("rid: " + rId + " poly: " + ps + "<br/>");   
+          */
+          
+          var p = new google.maps.Polygon();
+          p.setPath(rPoly);
+          
+          if(google.maps.geometry.poly.containsLocation(spCoord, p))
+            $("#results").append("{:region-id " + rId + " :lat10000 " + lat10000 + " :lng10000 " + lng10000 + "} ");   
+          
+        }
+        
+        $("#out").append("[spi " + spi + "| LatLng10000(" + lat10000 + "," + lng10000 + ")] ");
+        
+        var nextSpi = spi+1;
+        if(nextSpi < soilProfiles.length)
+          window.setTimeout("calc(" + nextSpi + ")", 100);
+        else
+          alert("finished");
+      }
+            
       function initialize() {
         
-        //var polygons=null;
-        //google.maps.event.addDomListener(drawingManager, "polygoncomplete", function(polygon) {
-        //  polygons=polygon;
-        //});
+        alert("starting");
+       
+        window.setTimeout("calc(0)", 500);
         
+        /*
+        var w = new Worker("polygons-worker.js");
         
-        //alert(polygons);
-        
-        //var opts = new google.maps.PolygonOptions();
-        var path = new Array(new google.maps.LatLng(0,0), new google.maps.LatLng(1,0),
-                     new google.maps.LatLng(1,1), new google.maps.LatLng(0,1));
-                
-        var p = new google.maps.Polygon();
-        p.setPath(path);
-        
-        var contains = google.maps.geometry.poly.containsLocation(new google.maps.LatLng(0.5, 0.5), p);
-                                                                 
-        
-        alert("contains: " + contains);
-                
-      }
+        w.onmessage = function(event){
+          var data = event.data;
+          
+          alert(data);
+          
+          if(data.type == "debug")
+            $("#out").append("lat: " + data.lat + " lng: " + data.lng + "<br/>"); 
+          else if(data.type == "result")
+            $("#results").append("{:region-id " + data.rid + " :lat10000 " + data.lat + " :lng10000 " + data.lng + "} ");   
+        };
+          
+        w.postMessage("start");
+       }; 
+        */
+       }
     </script>
   </head>
   <body onload="initialize()">
-    <div id="map_canvas" style="width: 100%; height: 100%"></div>
+    <div id="results"></div>
+    <div id="out"></div>
   </body>
 </html>
 
