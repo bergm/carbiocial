@@ -1,7 +1,9 @@
 (ns create-soil-database.core
-  (require [korma 
+  (require [korma
             [db :as kdb]
             [core :as kc]]
+           [clojure.java.jdbc :as j]
+           [clojure.java.jdbc.sql :as s]
            [clojure.edn :as edn]
            [clojure-csv.core :as csv]
            [clojure.algo.generic.functor :as gf]))
@@ -9,7 +11,7 @@
 (def cols {:lat :lat_times_10000
            :lng :lng_times_10000
            :h-id :horizon_id
-           :soil-type :soil_type
+           :soil-class-id :soil_class_id
            :soil-depth :soil_profile_depth_cm
            :h-symb :horizon_symbol
            :upper :upper_horizon_cm
@@ -22,33 +24,64 @@
            :c-n :c_n
            :bd :bulk_density_t_per_m3})
 
-(kdb/defdb db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
+(def sqlite-db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
 
-(kc/defentity soil-data)
+#_(kdb/defdb db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
 
-(def file (slurp "MTSoilDB_Carbiocial_0-1_result-original.txt"))
+#_(kc/defentity soil_data)
+
+#_(kc/defentity soil_class)
+
+(def file (slurp "MTSoilDB_Carbiocial_0-2_result_mod.txt"))
 
 (def parsed-csv (csv/parse-csv file :delimiter \tab))
 
-(defn create-insert-seq [csv]
+(defn create-insert-seq* [csv]
   (for [[lat lng soil-class soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
     {(:lat cols) (int (* (edn/read-string lat) 10000))
-     (:lng cols) (int (* (edn/read-string lng) 10000)) 
-     (:h-id cols) (edn/read-string hz-id) 
-     (:soil-type cols) soil-class 
+     (:lng cols) (int (* (edn/read-string lng) 10000))
+     (:h-id cols) (edn/read-string hz-id)
+     :soil-class soil-class
      (:soil-depth cols) (edn/read-string soil-depth)
-     (:h-symb cols) hz-simb 
-     (:upper cols) (edn/read-string upper) 
-     (:lower cols) (edn/read-string lower) 
-     (:silt cols) (edn/read-string silt) 
-     (:clay cols) (edn/read-string clay) 
+     (:h-symb cols) hz-simb
+     (:upper cols) (edn/read-string upper)
+     (:lower cols) (edn/read-string lower)
+     (:silt cols) (edn/read-string silt)
+     (:clay cols) (edn/read-string clay)
      (:sand cols) (edn/read-string sand)
-     (:ph cols) (edn/read-string ph) 
-     (:c cols) (edn/read-string c) 
-     (:c-n cols) (edn/read-string c-n) 
+     (:ph cols) (edn/read-string ph)
+     (:c cols) (edn/read-string c)
+     (:c-n cols) (edn/read-string c-n)
      (:bd cols) (edn/read-string bd)}))
 
-(def insert-seq (create-insert-seq (rest parsed-csv)))
+(defn soil-classes-to-id [iseq*]
+  (reduce (fn [a sc]
+            (if (contains? a sc)
+              a
+              (assoc a sc (count a))))
+          {} (map :soil-class iseq*)))
+
+(defn soil-classes-iseq [sc-to-id]
+   (map (fn [[sc id]] {:id id :name sc}) sc-to-id))
+
+(defn create-insert-seq [sc-to-id iseq*]
+  (map (fn [m]
+         (-> m
+             (assoc ,,, (:soil-class-id cols) (get sc-to-id (:soil-class m)))
+             (dissoc ,,, :soil-class)))
+       iseq*))
+
+(def insert-seq* (create-insert-seq* (rest parsed-csv)))
+(def insert-seq (create-insert-seq (soil-classes-to-id insert-seq*)
+                                   insert-seq*))
+
+(defn soil-classes [iseq]
+  (->> iseq
+       (map (:soil-class cols) ,,,)
+       (into #{} ,,,)
+       )
+
+  )
 
 (defn do-check [iseq]
   (let [errors (atom [])
@@ -57,7 +90,7 @@
                                 v (select-keys iv (apply disj (into #{} (keys iv)) (keys k)))]
                             (if (not (find m k))
                               (assoc m k v)
-                              (do 
+                              (do
                                 (swap! errors conj k)
                                 m))))
                         {} iseq)]
@@ -68,7 +101,7 @@
                     (let [k (select-keys v [(:lat cols) (:lng cols)])
                           hid ((:h-id cols) v)
                           m* (assoc m k (get m k (sorted-map)))]
-                      (assoc-in m* [k hid] {:upper ((:upper cols) v) 
+                      (assoc-in m* [k hid] {:upper ((:upper cols) v)
                                             :lower ((:lower cols) v)})))
                   {} iseq)
         ;_ (println "at m2: " (first m))
@@ -81,17 +114,17 @@
                                        v*))
                                    v)])
                          m3))
-        non-ok (filter (comp (partial not-every? #{:ok}) second) m4)]  
+        non-ok (filter (comp (partial not-every? #{:ok}) second) m4)]
     non-ok))
 
 (defn flatten-2-level-map [two-level-map]
-  (flatten 
+  (flatten
    (for [[k v] two-level-map]
      (for [[k* v*] v]
        (-> v*
            (merge ,,, k)
            (assoc ,,, (:h-id cols) k*))))))
-   
+
 (defn correct-overlapping-depths [iseq errors]
   (let [m (reduce (fn [m v]
                     (let [k (select-keys v [(:lat cols) (:lng cols)])
@@ -99,18 +132,18 @@
                           m* (assoc m k (get m k (sorted-map)))]
                       (assoc-in m* [k hid] (select-keys v (disj (into #{} (keys v)) #{(:lat cols) (:lng cols) (:h-id cols)})))))
                   {} iseq)
-                
+
         m2 (gf/fmap (fn [v]
-                      (second 
+                      (second
                        (reduce (fn [[id* v] [id v*]]
                                  (if (= 1 (- id id*))
                                    [id v]
                                    [(inc id*) (assoc (dissoc v id) (inc id*) v*)]))
                                [0 v] v)))
                     m)
-        
+
         m3 (reduce (fn [m [ek _]]
-                     (assoc-in m [ek 2] 
+                     (assoc-in m [ek 2]
                                (assoc (get-in m [ek 2]) (:upper cols) (inc (get-in m [ek 1 (:lower cols)])))))
                    m2 errors)
         ]
@@ -120,29 +153,33 @@
   (dorun (map (fn [[k v]] (println k v)) (overlapping-depths iseq))))
 
 (defn do-check-horizon-depths* [iseq]
-  (dorun (map (fn [[k v]] (println k v)) 
-              (-> iseq 
+  (dorun (map (fn [[k v]] (println k v))
+              (-> iseq
                   (correct-overlapping-depths ,,, (overlapping-depths iseq))
                   overlapping-depths))))
 
-(defn do-insert-corrected [iseq]
-  (dorun 
+#_(defn do-insert-corrected [iseq]
+  (dorun
    (for [ivalue (correct-overlapping-depths iseq (overlapping-depths iseq))]
-     (do 
+     (do
        (println "lat: " ((:lat cols) ivalue) " lng: " ((:lng cols) ivalue) " id: " ((:h-id cols) ivalue))
        (kc/insert soil-data (kc/values [ivalue]))))))
 
-(defn do-insert [iseq]
-  (dorun 
+#_(defn do-insert [iseq]
+  (dorun
    (for [ivalue iseq]
-     (do 
+     (do
        (println "lat: " ((:lat cols) ivalue) " lng: " ((:lng cols) ivalue) " id: " ((:h-id cols) ivalue))
        (kc/insert soil-data (kc/values [ivalue]))))))
 
-(defn do-insert-at-once []
+#_(defn do-insert-at-once []
   (kc/insert soil-data (kc/values insert-seq)))
 
-(defn -main
+(defn do-insert-at-once [table-kw iseq]
+  "insert into database"
+  (apply j/insert! sqlite-db table-kw iseq))
+
+#_(defn -main
   "I don't do a whole lot ... yet."
   [& args]
   (let [file (slurp "MTSoilDB_Carbiocial_0-1_result.txt")

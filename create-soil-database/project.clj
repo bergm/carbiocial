@@ -10,4 +10,5 @@
                  [org.clojure/java.jdbc "0.3.0-alpha1"]
                  [org.xerial/sqlite-jdbc "3.7.2"]
                  [org.clojure/algo.generic "0.1.0"]]
-  :main create-soil-database.soilmap)
+  ;:main create-soil-database.core
+  )
