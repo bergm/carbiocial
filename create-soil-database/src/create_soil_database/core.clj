@@ -11,8 +11,9 @@
 (def cols {:lat :lat_times_10000
            :lng :lng_times_10000
            :h-id :horizon_id
+           :soil-class :soil_class
            :soil-class-id :soil_class_id
-           :soil-depth :soil_profile_depth_cm
+           :soil-depth :original_soil_profile_depth_cm
            :h-symb :horizon_symbol
            :upper :upper_horizon_cm
            :lower :lower_horizon_cm
@@ -28,22 +29,19 @@
 
 #_(kdb/defdb db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
 
-#_(kc/defentity soil_data)
-
-#_(kc/defentity soil_class)
-
 (def file (slurp "MTSoilDB_Carbiocial_0-2_result_mod.txt"))
 
 (def parsed-csv (csv/parse-csv file :delimiter \tab))
 
 (defn create-insert-seq* [csv]
-  (for [[lat lng soil-class soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
+  (for [[lat lng soil-class soil-class-2 soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
     {(:lat cols) (int (* (edn/read-string lat) 10000))
      (:lng cols) (int (* (edn/read-string lng) 10000))
      (:h-id cols) (edn/read-string hz-id)
-     :soil-class soil-class
+     (:soil-class cols) (edn/read-string soil-class)
+     :soil-class* (edn/read-string soil-class-2)
      (:soil-depth cols) (edn/read-string soil-depth)
-     (:h-symb cols) hz-simb
+     (:h-symb cols) (edn/read-string hz-simb)
      (:upper cols) (edn/read-string upper)
      (:lower cols) (edn/read-string lower)
      (:silt cols) (edn/read-string silt)
@@ -59,7 +57,7 @@
             (if (contains? a sc)
               a
               (assoc a sc (count a))))
-          {} (map :soil-class iseq*)))
+          {} (map :soil-class* iseq*)))
 
 (defn soil-classes-iseq [sc-to-id]
    (map (fn [[sc id]] {:id id :name sc}) sc-to-id))
@@ -67,21 +65,19 @@
 (defn create-insert-seq [sc-to-id iseq*]
   (map (fn [m]
          (-> m
-             (assoc ,,, (:soil-class-id cols) (get sc-to-id (:soil-class m)))
-             (dissoc ,,, :soil-class)))
+             (assoc ,,, (:soil-class-id cols) (get sc-to-id (:soil-class* m)))
+             (dissoc ,,, :soil-class*)))
        iseq*))
 
 (def insert-seq* (create-insert-seq* (rest parsed-csv)))
 (def insert-seq (create-insert-seq (soil-classes-to-id insert-seq*)
                                    insert-seq*))
 
-(defn soil-classes [iseq]
-  (->> iseq
-       (map (:soil-class cols) ,,,)
-       (into #{} ,,,)
-       )
+(defn do-insert-at-once [table-kw iseq]
+  "insert into database"
+  (apply j/insert! sqlite-db table-kw iseq))
 
-  )
+
 
 (defn do-check [iseq]
   (let [errors (atom [])
@@ -175,9 +171,7 @@
 #_(defn do-insert-at-once []
   (kc/insert soil-data (kc/values insert-seq)))
 
-(defn do-insert-at-once [table-kw iseq]
-  "insert into database"
-  (apply j/insert! sqlite-db table-kw iseq))
+
 
 #_(defn -main
   "I don't do a whole lot ... yet."
