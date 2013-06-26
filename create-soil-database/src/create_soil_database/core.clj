@@ -11,7 +11,7 @@
 (def cols {:lat :lat_times_10000
            :lng :lng_times_10000
            :h-id :horizon_id
-           :soil-class :soil_class
+           :soil-type :soil_type
            :soil-class-id :soil_class_id
            :soil-depth :original_soil_profile_depth_cm
            :h-symb :horizon_symbol
@@ -29,17 +29,17 @@
 
 #_(kdb/defdb db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
 
-(def file (slurp "MTSoilDB_Carbiocial_0-2_result_mod.txt"))
+(def file (slurp "MTSoilDB_Carbiocial_0-3_result_mod.txt"))
 
 (def parsed-csv (csv/parse-csv file :delimiter \tab))
 
 (defn create-insert-seq* [csv]
-  (for [[lat lng soil-class soil-class-2 soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
+  (for [[lat lng soil-type soil-class soil-depth hz-simb upper lower hz-id silt clay sand ph c c-n bd] csv]
     {(:lat cols) (int (* (edn/read-string lat) 10000))
      (:lng cols) (int (* (edn/read-string lng) 10000))
      (:h-id cols) (edn/read-string hz-id)
-     (:soil-class cols) (edn/read-string soil-class)
-     :soil-class* (edn/read-string soil-class-2)
+     (:soil-type cols) (edn/read-string soil-type)
+     :soil-class (edn/read-string soil-class)
      (:soil-depth cols) (edn/read-string soil-depth)
      (:h-symb cols) (edn/read-string hz-simb)
      (:upper cols) (edn/read-string upper)
@@ -57,7 +57,7 @@
             (if (contains? a sc)
               a
               (assoc a sc (count a))))
-          {} (map :soil-class* iseq*)))
+          {} (map :soil-class iseq*)))
 
 (defn soil-classes-iseq [sc-to-id]
    (map (fn [[sc id]] {:id id :name sc}) sc-to-id))
@@ -65,8 +65,8 @@
 (defn create-insert-seq [sc-to-id iseq*]
   (map (fn [m]
          (-> m
-             (assoc ,,, (:soil-class-id cols) (get sc-to-id (:soil-class* m)))
-             (dissoc ,,, :soil-class*)))
+             (assoc ,,, (:soil-class-id cols) (get sc-to-id (:soil-class m)))
+             (dissoc ,,, :soil-class)))
        iseq*))
 
 (def insert-seq* (create-insert-seq* (rest parsed-csv)))
