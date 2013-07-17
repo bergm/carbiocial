@@ -163,3 +163,4 @@ pip-log.txt
 .DS_Store
 /create-soil-database/.lein-repl-history
 /create-climate-database/helge_era_interim_data_interpolated_for_target_region
+/create-climate-database/carbiocial-climate.sqlite
