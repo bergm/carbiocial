@@ -164,3 +164,9 @@ pip-log.txt
 /create-soil-database/.lein-repl-history
 /create-climate-database/helge_era_interim_data_interpolated_for_target_region
 /create-climate-database/carbiocial-climate.sqlite
+/create-voronoi-profile-id-grid/carbiocial.sqlite
+/create-voronoi-profile-id-grid/create-voronoi-profile-id-grid.sdf
+/create-voronoi-profile-id-grid/create-voronoi-profile-id-grid.v11.suo
+/create-voronoi-profile-id-grid/db-connections.ini
+/create-voronoi-profile-id-grid/solos_brazil_900.asc
+/create-voronoi-profile-id-grid/solos-profiles_brazil_900.asc
