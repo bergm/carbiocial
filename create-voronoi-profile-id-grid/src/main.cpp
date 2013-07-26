@@ -41,6 +41,18 @@ using namespace Db;
 using namespace Tools;
 using namespace Grids;
 
+pair<int, int> roundTo5(double value)
+{
+	auto v = div(int(value), 10);
+	switch(v.rem)
+	{
+	case 0: case 1: case 2: return make_pair(v.quot*10, v.rem);
+	case 3: case 4: case 5: case 6: case 7: return make_pair(v.quot*10 + 5, 5 - v.rem);
+	case 8: case 9: return make_pair(v.quot*10 + 10, 10 - v.rem); 
+	default: ;
+	}
+}
+
 void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSectorsFile, int roundToDigits = 0)
 {
 	GridPPtr solos(new GridP("solos-soil-class-ids", GridP::ASCII, pathToSoilClassIdsGrid, UTM21S_EPSG32721));
@@ -76,14 +88,53 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 					GridPPtr sg = GridPPtr(solos->subGridClone(top, left, rows, cols));
 
 					auto f = sg->frequency<int>(true, 0, 0);
-					ostringstream os;
-					for_each(f.begin(), f.end(), [&os, roundToDigits](pair<double, double> p)
+					
+					//int cumRoundError = 0;
+					int sumOriginalPercentage = 0;
+					int sumRoundedPercentage = 0;
+					vector<pair<int, int>> idAndPercentages;
+					for_each(f.begin(), f.end(), [&](pair<double, double> p)
 					{ 
-						int roundedPercentage = int(Tools::round(p.first, roundToDigits, false));
+						auto rt5 = roundTo5(p.first);
+						//cumRoundError += rt5.second;
+						sumOriginalPercentage += int(p.first);
+						int roundedPercentage = rt5.first;//int(Tools::round(p.first, roundToDigits, false));
+						sumRoundedPercentage += roundedPercentage;
 						if(roundedPercentage > 0)
-							os << int(p.second) << " = " << roundedPercentage << "%" << endl;
+							idAndPercentages.push_back(make_pair(int(p.second), roundedPercentage));
 					});
+					
+					int roundError = sumRoundedPercentage - 100;
+					if(roundError != 0) 
+					{
+						int delta = roundError > 0 
+							? -1 //we got too much percent = over 100%
+							: 1; //we got too few percent = below 100%
 
+						int i = 0;
+						while(roundError > 0)
+						{
+							if(i == idAndPercentages.size())
+								i = 0;
+
+							idAndPercentages[i].second += delta;
+							roundError += delta;
+							
+							i++;
+						}
+
+						remove_if(idAndPercentages.begin(), idAndPercentages.end(), [](pair<int, int> p)
+						{
+							return p.second <= 0;
+						});
+					}
+			
+					ostringstream os;
+					for_each(idAndPercentages.begin(), idAndPercentages.end(), [&](pair<int, int> p)
+					{
+						os << p.first << " = " << p.second << "%" << endl;
+					});
+					
 					if(!os.str().empty())
 					{
 						s.insert(os.str());
@@ -353,11 +404,11 @@ int main(int argc, char** argv)
 	//*
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_sinop_900.asc", 
-		"../sectors_sinop_growing-window_round-to-1.txt",
+		"../sectors_sinop_growing-window_round-to-5.txt",
 		1);
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_campo-verde_900.asc", 
-		"../sectors_campo-verde_growing-window_round-to-1.txt",
+		"../sectors_campo-verde_growing-window_round-to-5.txt",
 		1);
 		//*/
 
