@@ -53,12 +53,16 @@ pair<int, int> roundTo5(double value)
 	}
 }
 
-void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSectorsFile, int roundToDigits = 0)
+enum RegionId { cuiaba = 1, sinop = 2, novoProgresso = 3, campoVerde = 4 };
+
+void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSectorsFile, int roundToDigits,
+													 RegionId regionId)
 {
 	GridPPtr solos(new GridP("solos-soil-class-ids", GridP::ASCII, pathToSoilClassIdsGrid, UTM21S_EPSG32721));
 	
 	unordered_set<string> s;
 	map<string, vector<int>> s2sectorIds;
+	map<string, vector<pair<int, int>>> s2soilClassDistribution;
 	map<int, pair<int, int>> sectorId2topLeft;
 
 	int sectorId = 0;
@@ -112,7 +116,7 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 							: 1; //we got too few percent = below 100%
 
 						int i = 0;
-						while(roundError > 0)
+						while(roundError != 0)
 						{
 							if(i == idAndPercentages.size())
 								i = 0;
@@ -134,11 +138,14 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 					{
 						os << p.first << " = " << p.second << "%" << endl;
 					});
+					string distributionAsString = os.str();
 					
-					if(!os.str().empty())
+					if(!distributionAsString.empty())
 					{
-						s.insert(os.str());
-						s2sectorIds[os.str()].push_back(sectorId);
+						s.insert(distributionAsString);
+						s2sectorIds[distributionAsString].push_back(sectorId);
+						if(s2soilClassDistribution.find(distributionAsString) == s2soilClassDistribution.end())
+							s2soilClassDistribution[distributionAsString] = idAndPercentages;
 					}
 
 					//cout << "[" << top << "|" << left << "] ";
@@ -155,6 +162,42 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 		cout << "rowSize: " << rowSize << endl;
 	}
 		
+	//*
+	//write to database
+	DBPtr con(new MysqlDB("144.41.15.33", "mberg", "ZaLf2013", "carbiocial"));
+	
+	string insert = 
+		"insert into tbl_unique_sectors_in_municipality (municip_id, sector_id, soil_type_id, percentage) "
+		"values ";
+
+	int uniqueSectorId = 0;
+	for_each(s2soilClassDistribution.begin(), s2soilClassDistribution.end(), 
+		[&](const pair<string, vector<pair<int, int>>>& p)
+	{
+		ostringstream inserts;
+		inserts << insert;
+
+		bool firstElement = true;
+
+		for_each(p.second.begin(), p.second.end(), [&](pair<int, int> p2)
+		{
+			inserts 
+				<< (firstElement ? "" : ", ") << "(" 
+				<< int(regionId) << ", " << uniqueSectorId << ", " 
+				<< p2.first << ", " << p2.second << ")";
+
+			firstElement = false;
+		});
+	
+		cout << inserts.str() << endl; 
+
+		con->insert(inserts.str());
+
+		uniqueSectorId++;
+	});
+	
+	//*/
+	
 	ofstream ofs(outputPathToSectorsFile);
 
 	/*
@@ -405,11 +448,11 @@ int main(int argc, char** argv)
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_sinop_900.asc", 
 		"../sectors_sinop_growing-window_round-to-5.txt",
-		1);
+		1, sinop);
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_campo-verde_900.asc", 
 		"../sectors_campo-verde_growing-window_round-to-5.txt",
-		1);
+		1, campoVerde);
 		//*/
 
 	/*
