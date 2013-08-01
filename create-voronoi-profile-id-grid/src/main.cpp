@@ -35,11 +35,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "db/db.h"
 #include "tools/coord-trans.h"
 #include "grid/grid+.h"
+#include "carbiocial.h"
 
 using namespace std;
 using namespace Db;
 using namespace Tools;
 using namespace Grids;
+using namespace Carbiocial;
 
 pair<int, int> roundTo5(double value)
 {
@@ -60,9 +62,11 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 {
 	GridPPtr solos(new GridP("solos-soil-class-ids", GridP::ASCII, pathToSoilClassIdsGrid, UTM21S_EPSG32721));
 	
+	typedef int SoilId;
+
 	unordered_set<string> s;
 	map<string, vector<int>> s2sectorIds;
-	map<string, vector<pair<int, int>>> s2soilClassDistribution;
+	map<string, map<SoilId, int>> s2soilClassDistribution;
 	map<int, pair<int, int>> sectorId2topLeft;
 
 	int sectorId = 0;
@@ -91,61 +95,21 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 					int rows = top == noOfSectorsPerRow && rowRest > 0 ? rowRest : rowSize;
 					GridPPtr sg = GridPPtr(solos->subGridClone(top, left, rows, cols));
 
-					auto f = sg->frequency<int>(true, 0, 0);
-					
-					//int cumRoundError = 0;
-					int sumOriginalPercentage = 0;
-					int sumRoundedPercentage = 0;
-					vector<pair<int, int>> idAndPercentages;
-					for_each(f.begin(), f.end(), [&](pair<double, double> p)
-					{ 
-						auto rt5 = roundTo5(p.first);
-						//cumRoundError += rt5.second;
-						sumOriginalPercentage += int(p.first);
-						int roundedPercentage = rt5.first;//int(Tools::round(p.first, roundToDigits, false));
-						sumRoundedPercentage += roundedPercentage;
-						if(roundedPercentage > 0)
-							idAndPercentages.push_back(make_pair(int(p.second), roundedPercentage));
-					});
-					
-					int roundError = sumRoundedPercentage - 100;
-					if(roundError != 0) 
-					{
-						int delta = roundError > 0 
-							? -1 //we got too much percent = over 100%
-							: 1; //we got too few percent = below 100%
+					auto rsf = roundedSoilFrequency(sg, roundToDigits);
 
-						int i = 0;
-						while(roundError != 0)
-						{
-							if(i == idAndPercentages.size())
-								i = 0;
-
-							idAndPercentages[i].second += delta;
-							roundError += delta;
-							
-							i++;
-						}
-
-						remove_if(idAndPercentages.begin(), idAndPercentages.end(), [](pair<int, int> p)
-						{
-							return p.second <= 0;
-						});
-					}
-			
 					ostringstream os;
-					for_each(idAndPercentages.begin(), idAndPercentages.end(), [&](pair<int, int> p)
+					for_each(rsf.begin(), rsf.end(), [&](pair<SoilId, int> p)
 					{
-						os << p.first << " = " << p.second << "%" << endl;
+						os << int(p.first) << " = " << p.second << "%" << endl;
 					});
 					string distributionAsString = os.str();
-					
+
 					if(!distributionAsString.empty())
 					{
 						s.insert(distributionAsString);
 						s2sectorIds[distributionAsString].push_back(sectorId);
 						if(s2soilClassDistribution.find(distributionAsString) == s2soilClassDistribution.end())
-							s2soilClassDistribution[distributionAsString] = idAndPercentages;
+							s2soilClassDistribution[distributionAsString] = rsf;
 					}
 
 					//cout << "[" << top << "|" << left << "] ";
@@ -172,14 +136,14 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 
 	int uniqueSectorId = 0;
 	for_each(s2soilClassDistribution.begin(), s2soilClassDistribution.end(), 
-		[&](const pair<string, vector<pair<int, int>>>& p)
+		[&](const pair<string, map<SoilId, int>>& p)
 	{
 		ostringstream inserts;
 		inserts << insert;
 
 		bool firstElement = true;
 
-		for_each(p.second.begin(), p.second.end(), [&](pair<int, int> p2)
+		for_each(p.second.begin(), p.second.end(), [&](pair<SoilId, int> p2)
 		{
 			inserts 
 				<< (firstElement ? "" : ", ") << "(" 
@@ -242,11 +206,11 @@ void sectorizeFullSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSe
 			int rows = top == 254 ? 5 : 10;
 			GridPPtr sg = GridPPtr(solos->subGridClone(top, left, rows, cols));
 			
-			auto f = sg->frequency<int>(true, 0, 0);
+			auto f = sg->frequencyRev<int>(true, 0, 0);
 			ostringstream os;
 			for_each(f.begin(), f.end(), [&os](pair<double, double> p)
 			{ 
-				int roundedPercentage = int(Tools::round(p.first, 1));
+				int roundedPercentage = Tools::roundRT<int>(p.first, -1);
 				//if(int((double(roundedPercentage)/10.0 - int(double(roundedPercentage)/10.0)) * 10) != 5)
 				//	roundedPercentage = int(Tools::round(p.first, 1, false));
 				//else
@@ -444,15 +408,19 @@ void createVoronoiSoilProfileGrid(string pathToSoilRegionGrid,
 
 int main(int argc, char** argv)
 {
+	//Tools::testRoundFloorCeil();
+
 	//*
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_sinop_900.asc", 
-		"../sectors_sinop_growing-window_round-to-5.txt",
-		1, sinop);
+		"../sectors_sinop_growing-window_round-to-10.txt",
+		-1, sinop);
+	//*/
+	//*
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_campo-verde_900.asc", 
-		"../sectors_campo-verde_growing-window_round-to-5.txt",
-		1, campoVerde);
+		"../sectors_campo-verde_growing-window_round-to-10.txt",
+		-1, campoVerde);
 		//*/
 
 	/*
