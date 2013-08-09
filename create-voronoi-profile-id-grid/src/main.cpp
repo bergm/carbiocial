@@ -95,7 +95,7 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 					int rows = top == noOfSectorsPerRow && rowRest > 0 ? rowRest : rowSize;
 					GridPPtr sg = GridPPtr(solos->subGridClone(top, left, rows, cols));
 
-					auto rsf = roundedSoilFrequency(sg, roundToDigits);
+					auto rsf = roundedSoilFrequency(sg.get(), roundToDigits);
 
 					ostringstream os;
 					for_each(rsf.begin(), rsf.end(), [&](pair<SoilId, int> p)
@@ -405,18 +405,85 @@ void createVoronoiSoilProfileGrid(string pathToSoilRegionGrid,
 	voronoiSoilClassIds->writeAscii<int>(outputPathToSoilClassIdsGrid);
 }
 
+void cloneHohenheimDBTables2localSQLite()
+{
+	DBPtr hhcon(new MysqlDB("144.41.15.33", "mberg", "ZaLf2013", "carbiocial"));
+	DBPtr lcon(new SqliteDB("../carbiocial.sqlite"));
+
+	string tables[] = 
+	{ "mpmas_crop_activity_ids" , 
+		"tbl_crop_calendar", 
+		"tbl_farm_types",
+		"tbl_fertilizer",
+		"tbl_fertilizer_use",
+		"tbl_fertilizer_use_perennials",
+		"tbl_municipalities",
+		"tbl_operations",
+		"tbl_production_practices",
+		"tbl_products",
+		"tbl_seasons",
+		"tbl_soil_types",
+		"tbl_unique_sectors_in_municipality",
+		"tbl_yields",
+		"tbl_yields_perennials"
+	};
+	
+	string select("select * from ");
+	string insert("insert or replace into ");
+
+	for(int ti = 0; ti < 15; ti++)
+	{
+		string t = tables[ti];
+
+		ostringstream soss;
+		soss << select << t;
+
+		hhcon->select(soss.str());
+		DBRow row;
+		while(!(row = hhcon->getRow()).empty())
+		{
+			ostringstream ioss;
+			ioss << insert << t << " values (";
+			for(int i = 0, size = row.size(); i < size; i++)
+			{
+				bool isString = 
+					(t == "tbl_farm_types" && (i == 1 || i == 2)) ||
+					(t == "tbl_fertilizer" && (i == 1 || i == 2)) ||
+					(t == "tbl_fertilizer_use" && i == 2) ||
+					(t == "tbl_fertilizer_use_perennials" && i == 2) ||
+					(t == "tbl_municipalities" && (i == 0 || i == 2 || i  == 3 || i == 4)) ||
+					(t == "tbl_operations" && (i == 1 || i == 2)) ||
+					(t == "tbl_production_practices" && (i == 2 || i  == 3 || i == 4)) ||
+					(t == "tbl_products" && (i == 1 || i == 2 || i  == 3)) ||
+					(t == "tbl_seasons" && (i == 1 || i == 2)) ||
+					(t == "tbl_soil_types" && (i == 1 || i == 2))
+					? true : false;
+				
+				ioss << (isString ? "'" : "") << (row[i].empty() ? "NULL" : row[i]) << (isString ? "'" : "") << (i < (size - 1) ? ", " : "");
+			}
+			ioss << ")";
+
+			//cout << ioss.str() << endl;
+			bool success = lcon->insert(ioss.str());
+			cout << (success ? "success" : "error") << " inserting " << ioss.str() << endl;
+		}
+	}
+
+}
 
 int main(int argc, char** argv)
 {
+	cloneHohenheimDBTables2localSQLite();
+
 	//Tools::testRoundFloorCeil();
 
-	//*
+	/*
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_sinop_900.asc", 
 		"../sectors_sinop_growing-window_round-to-10.txt",
 		-1, sinop);
 	//*/
-	//*
+	/*
 	sectorizeSubSolosGrid(
 		"../solos-soil-class-ids_campo-verde_900.asc", 
 		"../sectors_campo-verde_growing-window_round-to-10.txt",
