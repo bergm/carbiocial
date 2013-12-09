@@ -5,19 +5,20 @@
 
 (defn -main
   [& kvs]
-  (let [{:keys [rows cols append? content newline?] :as m}
+  (let [{:keys [data-dir rows cols append? content newline?] :as m}
         (reduce (fn [m [k v]]
                   (assoc m (keyword k) v))
                 {} (partition 2 kvs))
 
+	data-dir (or (edn/read-string data-dir) "data")
         append? (or (edn/read-string append?) false)
         nl? (edn/read-string newline?)
         newline? (if (nil? nl?) true nl?)
         content (str (or content "x") (when newline? \newline))]
     (doseq [r (range (edn/read-string rows)) c (range (edn/read-string cols))
-            :let [path-to-file (str "data/row-" r "/col-" c ".txt")]]
+            :let [path-to-file (str data-dir "/row-" r "/col-" c ".txt")]]
       (do
-        (io/make-parents path-to-file)
+        (when-not append? (io/make-parents path-to-file))
         (spit path-to-file content :append append?)))))
 
 
