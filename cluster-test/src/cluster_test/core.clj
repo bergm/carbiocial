@@ -5,9 +5,10 @@
 
 (defn -main
   [& kvs]
-  (let [{:keys [rows cols append? content newline?]}
+  (let [{:keys [rows cols append? content newline?] :as m}
         (reduce (fn [m [k v]]
-                  (assoc m (keyword k) v)) {} (partition 2 kvs))
+                  (assoc m (keyword k) v))
+                {} (partition 2 kvs))
 
         append? (or (edn/read-string append?) false)
         nl? (edn/read-string newline?)
