@@ -27,7 +27,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -68,6 +68,9 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <ExecutablePath>C:\Program Files (x86)\Microsoft Visual Studio 10.0\Common7\IDE;$(VCInstallDir)bin;$(WindowsSdkDir)bin\NETFX 4.0 Tools;$(WindowsSdkDir)bin;$(VSInstallDir)Common7\Tools\bin;$(VSInstallDir)Common7\tools;$(VSInstallDir)Common7\ide;$(ProgramFiles)\HTML Help Workshop;$(FrameworkSDKDir)\bin;$(MSBuildToolsPath32);$(VSInstallDir);$(SystemRoot)\SysWow64;$(FxCopDir);$(PATH);</ExecutablePath>
+    <IncludePath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;$(VCInstallDir)include;$(VCInstallDir)atlmfc\include;$(WindowsSdkDir)include;$(FrameworkSDKDir)\include;</IncludePath>
+    <LibraryPath>C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib;$(VCInstallDir)lib;$(VCInstallDir)atlmfc\lib;$(WindowsSdkDir)lib;$(FrameworkSDKDir)\lib</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -84,14 +87,16 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>NO_HDF5;NO_MYSQL;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\michael\development\GitHub\loki-lib\include;C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\include;C:\Users\michael\development\boost_1_53_0;C:\Users\michael\development\GitHub\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>MONICA;WINSOCK2;NO_HDF5;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\IbmOslV3Lib\osllib\include;C:\Users\michael\development\GitHub\monica\monica-mpmas\BRA018\code;C:\Users\michael\development\GitHub\monica\monica-mpmas\BRA020\code;C:\Users\michael\development\GitHub\monica\src;C:\Users\michael\development\mariadb_client-1.0.0-win32\mariadbclient\include;C:\Users\michael\development\GitHub\loki-lib\include;C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\include;C:\Users\michael\development\boost_1_53_0;C:\Users\michael\development\GitHub\util;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\binaries\win7\vc11\x86\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>proj_i.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\IbmOslV3Lib\osllib\lib;C:\Users\michael\development\GitHub\monica\monica-mpmas\BRA020;C:\Users\michael\development\mariadb_client-1.0.0-win32\lib;C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\binaries\win7\vc11\x86\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>oslmd6030.lib;libMpmas.lib;libmariadb.lib;proj_i.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -118,16 +123,16 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NO_HDF5;NO_MYSQL;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Users\michael\development\GitHub\loki-lib\include;C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\include;C:\Users\michael\development\boost_1_53_0;C:\Users\michael\development\GitHub\util;</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WINSOCK2;NO_HDF5;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Users\michael\development\GitHub\monica\src;C:\Users\michael\development\mariadb_client-1.0.0-win32\mariadbclient\include;C:\Users\michael\development\GitHub\loki-lib\include;C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\include;C:\Users\michael\development\boost_1_53_0;C:\Users\michael\development\GitHub\util</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\binaries\win7\vc11\x86\lib;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>proj_i.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Users\michael\development\mariadb_client-1.0.0-win32\lib;C:\Users\michael\development\GitHub\proj.4\proj-4.8.0\binaries\win7\vc11\x86\lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libmariadb.lib;proj_i.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,8 +156,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\monica\src\carbiocial.cpp" />
+    <ClCompile Include="..\..\..\monica\src\conversion.cpp" />
+    <ClCompile Include="..\..\..\monica\src\crop.cpp" />
+    <ClCompile Include="..\..\..\monica\src\debug.cpp" />
+    <ClCompile Include="..\..\..\monica\src\monica-parameters.cpp" />
+    <ClCompile Include="..\..\..\monica\src\monica.cpp" />
+    <ClCompile Include="..\..\..\monica\src\soilcolumn.cpp" />
+    <ClCompile Include="..\..\..\monica\src\soilmoisture.cpp" />
+    <ClCompile Include="..\..\..\monica\src\soilorganic.cpp" />
+    <ClCompile Include="..\..\..\monica\src\soiltemperature.cpp" />
+    <ClCompile Include="..\..\..\monica\src\soiltransport.cpp" />
+    <ClCompile Include="..\..\..\util\climate\climate-common.cpp" />
     <ClCompile Include="..\..\..\util\db\abstract-db-connections.cpp" />
     <ClCompile Include="..\..\..\util\db\db.cpp" />
+    <ClCompile Include="..\..\..\util\db\orm--.cpp" />
     <ClCompile Include="..\..\..\util\db\sqlite3.c" />
     <ClCompile Include="..\..\..\util\grid\grid+.cpp" />
     <ClCompile Include="..\..\..\util\grid\grid.cpp" />
@@ -164,8 +182,23 @@
     <ClCompile Include="..\src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\monica\src\carbiocial.h" />
+    <ClInclude Include="..\..\..\monica\src\conversion.h" />
+    <ClInclude Include="..\..\..\monica\src\crop.h" />
+    <ClInclude Include="..\..\..\monica\src\debug.h" />
+    <ClInclude Include="..\..\..\monica\src\monica-parameters.h" />
+    <ClInclude Include="..\..\..\monica\src\monica-typedefs.h" />
+    <ClInclude Include="..\..\..\monica\src\monica.h" />
+    <ClInclude Include="..\..\..\monica\src\soilcolumn.h" />
+    <ClInclude Include="..\..\..\monica\src\soilmoisture.h" />
+    <ClInclude Include="..\..\..\monica\src\soilorganic.h" />
+    <ClInclude Include="..\..\..\monica\src\soiltemperature.h" />
+    <ClInclude Include="..\..\..\monica\src\soiltransport.h" />
+    <ClInclude Include="..\..\..\util\climate\climate-common.h" />
     <ClInclude Include="..\..\..\util\db\abstract-db-connections.h" />
     <ClInclude Include="..\..\..\util\db\db.h" />
+    <ClInclude Include="..\..\..\util\db\orm--.h" />
+    <ClInclude Include="..\..\..\util\db\orm--typedefs.h" />
     <ClInclude Include="..\..\..\util\db\sqlite3.h" />
     <ClInclude Include="..\..\..\util\grid\dirent.h" />
     <ClInclude Include="..\..\..\util\grid\grid+.h" />

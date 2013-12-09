@@ -176,14 +176,14 @@ void sectorizeSubSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSec
 	ofs << "number of distinct sectors: " << s.size() << endl << endl;
 
 	ofs << "sector soil class area ---> sectorId1 sectorId2 ....." << endl << "------------------------------------" << endl;
-	for_each(s2sectorIds.begin(), s2sectorIds.end(), [&ofs](pair<string, vector<int>> p)
+	for_each(s2sectorIds.begin(), s2sectorIds.end(), [&](pair<string, vector<int>> p)
 	{
 		//if(p.first.substr(0, 11) == "-9999 = 100")
 		//	ofs << "-9999 = 100 -> " << p.second.size() << " sectors" << endl << endl;
 		//else
 		//{
 			ofs << p.first << "sectors ---> ";
-			for_each(p.second.begin(), p.second.end(), [&ofs](int v){ ofs << v << " "; });
+			for_each(p.second.begin(), p.second.end(), [&](int v){ ofs << v << " "; });
 			ofs << endl << endl;
 		//}
 	});
@@ -248,14 +248,14 @@ void sectorizeFullSolosGrid(string pathToSoilClassIdsGrid, string outputPathToSe
 	ofs << "number of distinct sectors: " << s.size() << endl << endl;
 
 	ofs << "sector soil class area ---> sectorId1 sectorId2 ....." << endl << "------------------------------------" << endl;
-	for_each(s2sectorIds.begin(), s2sectorIds.end(), [&ofs](pair<string, vector<int>> p)
+	for_each(s2sectorIds.begin(), s2sectorIds.end(), [&](pair<string, vector<int>> p)
 	{
 		//if(p.first.substr(0, 11) == "-9999 = 100")
 		//	ofs << "-9999 = 100 -> " << p.second.size() << " sectors" << endl << endl;
 		//else
 		//{
 			ofs << p.first << "sectors ---> ";
-			for_each(p.second.begin(), p.second.end(), [&ofs](int v){ ofs << v << " "; });
+			for_each(p.second.begin(), p.second.end(), [&](int v){ ofs << v << " "; });
 			ofs << endl << endl;
 		//}
 	});
@@ -428,6 +428,7 @@ void cloneHohenheimDBTables2localSQLite()
 		"tbl_yields_perennials"
 	};
 	
+	string deleteAll("delete from ");
 	string select("select * from ");
 	string insert("insert or replace into ");
 
@@ -435,6 +436,10 @@ void cloneHohenheimDBTables2localSQLite()
 	{
 		string t = tables[ti];
 
+		ostringstream doss;
+		doss << deleteAll << t;
+		lcon->del(doss.str());
+		
 		ostringstream soss;
 		soss << select << t;
 
@@ -479,13 +484,13 @@ int main(int argc, char** argv)
 
 	/*
 	sectorizeSubSolosGrid(
-		"../solos-soil-class-ids_sinop_900.asc", 
+		"../solos-soil-class-ids_brazil-sinop_900.asc", 
 		"../sectors_sinop_growing-window_round-to-10.txt",
 		-1, sinop);
 	//*/
 	/*
 	sectorizeSubSolosGrid(
-		"../solos-soil-class-ids_campo-verde_900.asc", 
+		"../solos-soil-class-ids_brazil-campo-verde_900.asc", 
 		"../sectors_campo-verde_growing-window_round-to-10.txt",
 		-1, campoVerde);
 		//*/

@@ -13,84 +13,198 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\Tools">
+      <UniqueIdentifier>{4d669ed5-b337-48b1-b2a8-345031c6255c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Monica">
+      <UniqueIdentifier>{46913775-61bf-4df4-b2cf-682bd604d722}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Db">
+      <UniqueIdentifier>{69d88021-d6dc-4531-beac-bdad5c270092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Grids">
+      <UniqueIdentifier>{49b46e58-4854-4114-8363-12884fe80393}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Monica">
+      <UniqueIdentifier>{fa3284ec-b238-478a-bc81-9f965217c77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Db">
+      <UniqueIdentifier>{ebd3aa99-3549-4d90-8917-70f44fd9416b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Tools">
+      <UniqueIdentifier>{742f96dc-0f0d-4e9a-9603-26dd1208e30f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Grids">
+      <UniqueIdentifier>{a90690a2-c875-4616-9b5a-001f98cab3a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Climate">
+      <UniqueIdentifier>{e029f4aa-36a9-47db-9063-c09473c48df9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Climate">
+      <UniqueIdentifier>{5315c90e-c067-4e00-a589-ad0a45e8e963}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\util\db\abstract-db-connections.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Db</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\util\db\db.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Db</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\util\db\sqlite3.c">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Db</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\util\grid\platform.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\..\monica\src\carbiocial.cpp">
+      <Filter>Source Files\Monica</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\util\grid\grid.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\util\grid\grid+.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\util\tools\algorithms.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\..\monica\src\conversion.cpp">
+      <Filter>Source Files\Monica</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\util\tools\coord-trans.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Tools</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\util\tools\read-ini.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="..\..\..\util\tools\algorithms.cpp">
+      <Filter>Source Files\Tools</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\util\tools\date.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\tools\read-ini.cpp">
+      <Filter>Source Files\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\grid\grid.cpp">
+      <Filter>Source Files\Grids</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\grid\grid+.cpp">
+      <Filter>Source Files\Grids</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\grid\platform.cpp">
+      <Filter>Source Files\Grids</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\monica-parameters.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\debug.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\crop.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\monica.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\soilcolumn.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\soilmoisture.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\soilorganic.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\soiltemperature.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\monica\src\soiltransport.cpp">
+      <Filter>Source Files\Monica</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\climate\climate-common.cpp">
+      <Filter>Source Files\Climate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\util\db\orm--.cpp">
+      <Filter>Source Files\Db</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\util\db\db.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\..\monica\src\carbiocial.h">
+      <Filter>Header Files\Monica</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\util\db\sqlite3.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\db\abstract-db-connections.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\grid\grid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\grid\grid+.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\grid\platform.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\grid\types.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\tools\algorithms.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="..\..\..\monica\src\conversion.h">
+      <Filter>Header Files\Monica</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\util\tools\coord-trans.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Tools</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\util\tools\datastructures.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\tools\read-ini.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\tools\use-stl-algo-boost-lambda.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\util\grid\dirent.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Tools</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\util\tools\date.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\tools\algorithms.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\grid\grid.h">
+      <Filter>Header Files\Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\grid\grid+.h">
+      <Filter>Header Files\Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\grid\dirent.h">
+      <Filter>Header Files\Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\grid\platform.h">
+      <Filter>Header Files\Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\tools\read-ini.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\db\abstract-db-connections.h">
+      <Filter>Header Files\Db</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\db\db.h">
+      <Filter>Header Files\Db</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\db\sqlite3.h">
+      <Filter>Header Files\Db</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\grid\types.h">
+      <Filter>Header Files\Grids</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\tools\use-stl-algo-boost-lambda.h">
+      <Filter>Header Files\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\debug.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\monica-parameters.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\monica-typedefs.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\crop.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\monica.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\soilcolumn.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\soilmoisture.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\soilorganic.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\soiltemperature.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\monica\src\soiltransport.h">
+      <Filter>Header Files\Monica</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\climate\climate-common.h">
+      <Filter>Header Files\Climate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\db\orm--.h">
+      <Filter>Header Files\Db</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\util\db\orm--typedefs.h">
+      <Filter>Header Files\Db</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
