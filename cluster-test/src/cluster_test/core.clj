@@ -3,14 +3,9 @@
   (:require [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
-(defn -main
-  [& kvs]
-  (let [{:keys [data-dir rows cols append? content newline?] :as m}
-        (reduce (fn [m [k v]]
-                  (assoc m (keyword k) v))
-                {} (partition 2 kvs))
-
-	data-dir (or (edn/read-string data-dir) "data")
+(defn write-files-test
+  [{:keys [data-dir rows cols append? content newline?]}]
+  (let [data-dir (or (edn/read-string data-dir) "data")
         append? (or (edn/read-string append?) false)
         nl? (edn/read-string newline?)
         newline? (if (nil? nl?) true nl?)
@@ -21,7 +16,25 @@
         (when-not append? (io/make-parents path-to-file))
         (spit path-to-file content :append append?)))))
 
+(defn read-files-test
+  [{:keys [data-dir rows cols]}]
+  (let [data-dir (or (edn/read-string data-dir) "data")]
+    (doseq [r (range (edn/read-string rows)) c (range (edn/read-string cols))
+            :let [path-to-file (str data-dir "/row-" r "/col-" c ".txt")]]
+      (slurp path-to-file))))
+
+(defn -main
+  [& kvs]
+  (let [options (reduce (fn [m [k v]]
+                          (assoc m (keyword k) v))
+                        {} (partition 2 kvs))]
+    (case (:test options)
+      "read" (read-files-test options)
+      "write" (write-files-test options)
+      nil (write-files-test options))))
 
 #_(-main :rows "10" :cols "10" :append? "true" :content "a")
+
+
 
 
