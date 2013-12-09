@@ -7,8 +7,8 @@
   [rows cols & [append? content]]
   (let [append? (or (edn/read-string append?) false)
         content (or content "x\n")]
-    (for [r (range (edn/read-string rows)) c (range (edn/read-string cols))
-          :let [path-to-file (str "data/row-" r "/col-" c ".txt")]]
+    (doseq [r (range (edn/read-string rows)) c (range (edn/read-string cols))
+            :let [path-to-file (str "data/row-" r "/col-" c ".txt")]]
       (do
         (io/make-parents path-to-file)
         (spit path-to-file content)))))
