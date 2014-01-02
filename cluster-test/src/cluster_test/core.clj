@@ -34,7 +34,8 @@
                           (assoc m (keyword k) v))
                         {} (partition 2 kvs))]
     (case (:test options)
-      "read" (read-files-test options)
+      "read" (doseq [t (range 1 (edn/read-string (or (:count options) "4")))]
+		(.start (Thread. (partial read-files-test options #_(assoc options :data-dir (str "data-" t))))))
       "write" (write-files-test options)
       nil (write-files-test options))))
 
