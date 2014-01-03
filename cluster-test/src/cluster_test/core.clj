@@ -40,7 +40,7 @@
           year (range from-year (inc to-year))
           :let [leap-year? (.. (ctc/date-time year) year isLeap)
                 days-in-year (if leap-year? 366 365) #_(.. (ctc/date-time year) year toInterval toDuration getStandardDays)]
-          diy (range (max 1 from-diy) (min to-diy days-in-year))
+          diy (range (max 1 from-diy) (inc (min to-diy days-in-year)))
           :let [date (ctc/plus (ctc/date-time year 1 1) (ctc/days (dec diy)))
                 date* (ctcoe/to-long date)
                 [day month] ((juxt ctc/day ctc/month) date)
@@ -61,10 +61,12 @@
            (map str [(ctc/day date) (ctc/month date) (ctc/year date) date-str tmin tavg tmax p gs rh ws])))
        tmin t2m_hk tmax p gs rh ws))
 
-(defn drop-header []
+(defn drop-rows
+  "drops a the given amount of rows and the 6 initial header rows"
+  [rows-to-drop]
   (doseq [[sym lseqs] @line-seqs
           [date* lseq] lseqs]
-    (swap! line-seqs update-in [sym date*] #(drop 6 %))))
+    (swap! line-seqs update-in [sym date*] #(drop (+ 6 rows-to-drop) %))))
 
 (def fmap
   (fn [f m]
@@ -76,10 +78,10 @@
 (def csv-header
   ["day" "month" "year" "date" "tmin" "tavg" "tmax" "precip" "globrad" "relhumid" "windspeed"])
 
-(defn write-climate-files [path write-max-rows]
+(defn write-climate-files [path start-at-row write-max-rows skip-header?]
   (loop [rows @line-seqs
-         row-count 0] ;loop over rows in all files
-    (if (or (= row-count write-max-rows) (-> rows :gs first second nil?))
+         row-count start-at-row] ;loop over rows in all files
+    (if (or (= (- row-count start-at-row) write-max-rows) (-> rows :gs first second nil?))
       :ready
       (let [row (fmap #(fmap (fn [v] (-> v first (cs/split ,,, #"\s+"))) %) rows)]
         (loop [cols row
@@ -90,23 +92,25 @@
                   path-to-file (str path "/row-" row-count "/col-" col-count ".asc")
                   _ (io/make-parents path-to-file)]
               (with-open [w (clojure.java.io/writer path-to-file :append true)]
-                (.write w (csv/write-csv [csv-header]))
+                (when-not skip-header? (.write w (csv/write-csv [csv-header])))
                 (doseq [row-str row-strs]
                   (.write w (csv/write-csv [row-str]))))
               (recur (fmap #(fmap next %) cols) (inc col-count)))))
         (recur (fmap #(fmap next %) rows) (inc row-count))))))
 
-(defn run-climate-file-conversion [{:keys [read-path write-path from-year to-year from-diy to-diy write-max-rows]}]
+(defn run-climate-file-conversion [{:keys [read-path write-path from-year to-year from-diy to-diy from-row to-row skip-header?]}]
   (let [read-path (or read-path "in-data")
         write-path (or write-path "out-data")
         from-year (or (edn/read-string from-year) 1981)
         to-year (or (edn/read-string to-year) 2012)
         from-diy (or (edn/read-string from-diy) 1)
         to-diy (or (edn/read-string to-diy) 366)
-        write-max-rows (or (edn/read-string write-max-rows) 2545)]
+        from-row (or (edn/read-string from-row) 0)
+        to-row (or (edn/read-string to-row) 2545)
+        skip-header? (or (edn/read-string skip-header?) false)]
     (open-files read-path from-year to-year from-diy to-diy)
-    (drop-header)
-    (write-climate-files write-path write-max-rows)
+    (drop-rows from-row)
+    (write-climate-files write-path from-row (max 0 (- to-row from-row)) skip-header?)
     (close-files)))
 
 (defn -main
@@ -122,6 +126,8 @@
       nil (write-files-test options))))
 
 #_(-main :rows "10" :cols "10" :append? "true" :content "a")
+
+
 
 
 
