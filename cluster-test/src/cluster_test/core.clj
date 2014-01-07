@@ -131,13 +131,13 @@
         from-year (or (edn/read-string from-year) 1981)
         to-year (or (edn/read-string to-year) 2012)
         from-diy (or (edn/read-string from-diy) 1)
-        to-diy (or (edn/read-string to-diy) 366)
+        to-diy (or (edn/read-string to-diy) 366) ;the correct number of days in year is calculated and overwrites 366 if necessary
         from-row (or (edn/read-string from-row) 0)
-        to-row (or (edn/read-string to-row) 2545)
+        to-row (or (edn/read-string to-row) (dec 2545))
         skip-header? (or (edn/read-string skip-header?) false)]
     (open-files read-path from-year to-year from-diy to-diy)
     (drop-rows from-row)
-    (write-climate-files* write-path from-row (max 0 (- to-row from-row)) skip-header?)
+    (write-climate-files* write-path from-row (max 0 (- (inc to-row) from-row)) skip-header?)
     (close-files)))
 
 (defn -main
@@ -153,6 +153,8 @@
       nil (write-files-test options))))
 
 #_(-main :rows "10" :cols "10" :append? "true" :content "a")
+
+
 
 
 
