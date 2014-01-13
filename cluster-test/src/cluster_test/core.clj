@@ -46,7 +46,8 @@
                 [day month] ((juxt ctc/day ctc/month) date)
                 rdr (clojure.java.io/reader (make-file-name (str path "/" (name sym) "_1981-2013/") sym day month year))]]
     (swap! opened-files assoc-in [sym date*] rdr)
-    (swap! line-seqs assoc-in [sym date*] (line-seq rdr))))
+    (swap! line-seqs assoc-in [sym date*] (line-seq rdr)))
+  (println "opened all files from year " from-year " to year " to-year " and from diy " from-diy " to " to-diy))
 
 
 (defn close-files []
@@ -66,7 +67,10 @@
   [rows-to-drop]
   (doseq [[sym lseqs] @line-seqs
           [date* lseq] lseqs]
-    (swap! line-seqs update-in [sym date*] #(drop (+ 6 rows-to-drop) %))))
+    (swap! line-seqs update-in [sym date*] #(do
+                                              (println "droping from file sym/date " sym "/" (ctf/unparse (ctf/formatter "dd.MM.yyyy") (ctcoe/from-long date*)))
+                                              (drop (+ 6 rows-to-drop) %))))
+  (println "droped " (+ 6 rows-to-drop)))
 
 (def fmap
   (fn [f m]
@@ -122,6 +126,7 @@
                 [date* lseq] lseqs]
           (swap! line-seqs update-in [sym date*] next))
         ;and recur
+        (println "wrote/updated row " row-count)
         (recur (inc row-count))))))
 
 
@@ -153,6 +158,8 @@
       nil (write-files-test options))))
 
 #_(-main :rows "10" :cols "10" :append? "true" :content "a")
+
+
 
 
 
