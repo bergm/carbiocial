@@ -82,26 +82,6 @@
 (def csv-header
   ["day" "month" "year" "date" "tmin" "tavg" "tmax" "precip" "globrad" "relhumid" "windspeed"])
 
-(defn write-climate-files [line-seqs path start-at-row write-max-rows skip-header?]
-  (loop [rows line-seqs
-         row-count start-at-row] ;loop over rows in all files
-    (if (or (= (- row-count start-at-row) write-max-rows) (-> rows :gs first second nil?))
-      :ready
-      (let [row (fmap #(fmap (fn [v] (-> v first (cs/split ,,, #"\s+"))) %) rows)]
-        (loop [cols row
-               col-count 0] ;loop over the cols in all files
-          (if (-> cols :gs first second nil?)
-            :ready
-            (let [row-strs (create-row-strs (fmap #(fmap first %) cols))
-                  path-to-file (str path "/row-" row-count "/col-" col-count ".asc")
-                  _ (io/make-parents path-to-file)]
-              (with-open [w (clojure.java.io/writer path-to-file :append true)]
-                (when-not skip-header? (.write w (csv/write-csv [csv-header])))
-                (doseq [row-str row-strs]
-                  (.write w (csv/write-csv [row-str]))))
-              (recur (fmap #(fmap next %) cols) (inc col-count)))))
-        (recur (fmap #(fmap next %) rows) (inc row-count))))))
-
 (defn write-climate-files* [path start-at-row write-max-rows skip-header?]
   (loop [row-count start-at-row] ;loop over rows in all files
     (if (or (= (- row-count start-at-row) write-max-rows) (-> @line-seqs :gs first second nil?))
@@ -168,4 +148,5 @@
 
 
 
-
+
+
