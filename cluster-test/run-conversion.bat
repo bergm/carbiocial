@@ -1,10 +1,19 @@
-cd C:\Users\michael\development\GitHub\carbiocial\cluster-test
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 1984 to-year 1987 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 1988 to-year 1991 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 1992 to-year 1995 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 1996 to-year 1999 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 2000 to-year 2003 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 2004 to-year 2007 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 2008 to-year 2011 from-row 2000 to-row 2544 skip-header? true
-java -Xms2g -Xmx4g -jar target\cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path f:/ write-path f:/climate-data-out-2000-2544 from-year 2012 to-year 2012 from-row 2000 to-row 2544 skip-header? true
-
+@echo off
+set from_row=0
+set to_row=499
+set read_path=f:/
+set write_path=f:/climate-data-out-%from_row%-%to_row%
+
+cd f:
+
+call :run 2013 2 false
+for /L %%i in (2016,3,2039) do call :run %%i 2 true
+call :run 2040 0 true
+
+GOTO :eof
+
+:run
+set /a to_year=%1+%2
+echo from-year:%1 to-year:%to_year%
+java -Xms2g -Xmx4g -jar cluster-test-0.1.0-SNAPSHOT-standalone.jar test conversion read-path %read_path% write-path %write_path% from-year %1 to-year %to_year% from-row %from_row% to-row %to_row% skip-header? %3
+GOTO :eof

@@ -44,7 +44,7 @@
           :let [date (ctc/plus (ctc/date-time year 1 1) (ctc/days (dec diy)))
                 date* (ctcoe/to-long date)
                 [day month] ((juxt ctc/day ctc/month) date)
-                rdr (clojure.java.io/reader (make-file-name (str path "/" (name sym) "_1981-2013/") sym day month year))]]
+                rdr (clojure.java.io/reader (make-file-name (str path "/" (name sym) "_2013-2040/") sym day month year))]]
     (swap! opened-files assoc-in [sym date*] rdr)
     (swap! line-seqs assoc-in [sym date*] (line-seq rdr)))
   (println "opened all files from year " from-year " to year " to-year " and from diy " from-diy " to " to-diy))
@@ -67,9 +67,11 @@
   [rows-to-drop]
   (doseq [[sym lseqs] @line-seqs
           [date* lseq] lseqs]
-    (swap! line-seqs update-in [sym date*] #(do
-                                              (println "droping from file sym/date " sym "/" (ctf/unparse (ctf/formatter "dd.MM.yyyy") (ctcoe/from-long date*)))
-                                              (drop (+ 6 rows-to-drop) %))))
+    (swap! line-seqs update-in [sym date*]
+           #(do
+             (println "droping from file sym/date " sym "/"
+                      (ctf/unparse (ctf/formatter "dd.MM.yyyy") (ctcoe/from-long date*)))
+             (drop (+ 6 rows-to-drop) %))))
   (println "droped " (+ 6 rows-to-drop)))
 
 (def fmap
@@ -94,7 +96,7 @@
           (if (-> cols :gs first second nil?)
             :ready
             (let [row-strs (create-row-strs (fmap #(fmap first %) cols))
-                  path-to-file (str path "/row-" row-count "/col-" col-count ".asc")
+                  path-to-file (str path "/row-" row-count "/col-" col-count ".txt")
                   _ (io/make-parents path-to-file)]
               (with-open [w (clojure.java.io/writer path-to-file :append true)]
                 (when-not skip-header? (.write w (csv/write-csv [csv-header])))
@@ -113,8 +115,8 @@
 (defn run-climate-file-conversion [{:keys [read-path write-path from-year to-year from-diy to-diy from-row to-row skip-header?]}]
   (let [read-path (or read-path "in-data")
         write-path (or write-path "out-data")
-        from-year (or (edn/read-string from-year) 1981)
-        to-year (or (edn/read-string to-year) 2012)
+        from-year (or (edn/read-string from-year) 2013)
+        to-year (or (edn/read-string to-year) 2040)
         from-diy (or (edn/read-string from-diy) 1)
         to-diy (or (edn/read-string to-diy) 366) ;the correct number of days in year is calculated and overwrites 366 if necessary
         from-row (or (edn/read-string from-row) 0)
