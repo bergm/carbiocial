@@ -25,11 +25,12 @@
            :c-n :c_n
            :bd :bulk_density_t_per_m3})
 
-(def sqlite-db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
+(def sqlite-db (kdb/sqlite3 {:db "brazil.sqlite"}))
 
 #_(kdb/defdb db (kdb/sqlite3 {:db "carbiocial.sqlite"}))
 
-(def file (slurp "MTSoilDB_Carbiocial_0-3_result_mod.txt"))
+#_(def file (slurp "MTSoilDB_Carbiocial_0-3_result_mod.txt"))
+(def file (slurp "BR_Soil_Profiles_PP.txt"))
 
 (def parsed-csv (csv/parse-csv file :delimiter \tab))
 
@@ -76,7 +77,6 @@
 (defn do-insert-at-once [table-kw iseq]
   "insert into database"
   (apply j/insert! sqlite-db table-kw iseq))
-
 
 
 (defn do-check [iseq]
