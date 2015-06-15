@@ -35,7 +35,7 @@
 (def opened-files (atom {}))
 (def line-seqs (atom {}))
 
-(defn open-files [path from-year to-year from-diy to-diy]
+(defn open-files [path folder-suffix from-year to-year from-diy to-diy]
   (doseq [sym [:gs :ws :t2m_hk :tmin :tmax :p :rh]
           year (range from-year (inc to-year))
           :let [leap-year? (.. (ctc/date-time year) year isLeap)
@@ -44,10 +44,10 @@
           :let [date (ctc/plus (ctc/date-time year 1 1) (ctc/days (dec diy)))
                 date* (ctcoe/to-long date)
                 [day month] ((juxt ctc/day ctc/month) date)
-                rdr (clojure.java.io/reader (make-file-name (str path "/" (name sym) "_2013-2040/") sym day month year))]]
+                rdr (clojure.java.io/reader (make-file-name (str path "/" (name sym) folder-suffix "/") sym day month year))]]
     (swap! opened-files assoc-in [sym date*] rdr)
     (swap! line-seqs assoc-in [sym date*] (line-seq rdr)))
-  (println "opened all files from year " from-year " to year " to-year " and from diy " from-diy " to " to-diy))
+  (println "opened all fiwles from year " from-year " to year " to-year " and from diy " from-diy " to " to-diy))
 
 
 (defn close-files []
@@ -86,9 +86,15 @@
 
 (defn write-climate-files* [path start-at-row write-max-rows skip-header?]
   (loop [row-count start-at-row] ;loop over rows in all files
-    (if (or (= (- row-count start-at-row) write-max-rows) (-> @line-seqs :gs first second nil?))
+    (if (or (= (- row-count start-at-row) write-max-rows)
+            (-> @line-seqs :gs first second nil?))
       :ready
       (let [;create a functional map with seqs for the columns of a row
+            #__ #_(doseq [[s m] @line-seqs]
+                   (println "sym: " s)
+                   (doseq [[d v] m]
+                     (print d " ")
+                     (-> v first (cs/split,,, #"\s+"))))
             row (fmap #(fmap (fn [v] (-> v first (cs/split ,,, #"\s+"))) %) @line-seqs)]
         ;loop recursivly through all cols
         (loop [cols row
@@ -112,8 +118,9 @@
         (recur (inc row-count))))))
 
 
-(defn run-climate-file-conversion [{:keys [read-path write-path from-year to-year from-diy to-diy from-row to-row skip-header?]}]
+(defn run-climate-file-conversion [{:keys [read-path read-folder-suffix write-path from-year to-year from-diy to-diy from-row to-row skip-header?]}]
   (let [read-path (or read-path "in-data")
+        read-folder-suffix (or read-folder-suffix "_2001-2040")
         write-path (or write-path "out-data")
         from-year (or (edn/read-string from-year) 2013)
         to-year (or (edn/read-string to-year) 2040)
@@ -122,7 +129,7 @@
         from-row (or (edn/read-string from-row) 0)
         to-row (or (edn/read-string to-row) (dec 2545))
         skip-header? (or (edn/read-string skip-header?) false)]
-    (open-files read-path from-year to-year from-diy to-diy)
+    (open-files read-path read-folder-suffix from-year to-year from-diy to-diy)
     (drop-rows from-row)
     (write-climate-files* write-path from-row (max 0 (- (inc to-row) from-row)) skip-header?)
     (close-files)))
@@ -138,6 +145,12 @@
       "write" (write-files-test options)
       "conversion" (run-climate-file-conversion options)
       nil (write-files-test options))))
+
+(-main "test" "conversion" "read-path" "f:/" "read-folder-suffix" "_2001-2040"
+       "write-path" "f:/climate-data-years-2001-2040-rows-0-499"
+       "from-year" "2001" "to-year" "2003"
+       "from-row" "0" "to-row" "499"
+       "skip-header?" "false")
 
 #_(-main :rows "10" :cols "10" :append? "true" :content "a")
 

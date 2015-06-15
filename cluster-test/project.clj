@@ -1,6 +1,6 @@
-(defproject cluster-test "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+(defproject convert-climate-data "1.0"
+  :description "convert climate data from one grid per day and climate element format to one csv file with all climate data per pixel"
+  :url ""
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.5.1"]
@@ -13,4 +13,5 @@
 
 
 
-
+
+
